@@ -44,7 +44,7 @@ async function tileImage(file: File, tilingOptions: TilingOptions): Promise<Blob
       }
     }
     
-    return new Promise(resolve => canvas.toBlob(blob => resolve(blob!), 'image/png'));
+    return new Promise(resolve => canvas.toBlob(blob => resolve(blob!), 'image/png', 1.0));
 }
 
 
@@ -84,10 +84,17 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll, ti
         
         for (const fileItem of completedFiles) {
             const tiledBlob = await tileImage(fileItem.file, tilingOptions);
-            zip.file(`tiled_${fileItem.file.name.split('.')[0]}.png`, tiledBlob);
+            const originalFileName = fileItem.file.name.substring(0, fileItem.file.name.lastIndexOf('.')) || fileItem.file.name;
+            zip.file(`tiled_${originalFileName}.png`, tiledBlob);
         }
 
-        const zipBlob = await zip.generateAsync({type: 'blob'});
+        const zipBlob = await zip.generateAsync({
+            type: 'blob',
+            compression: "DEFLATE",
+            compressionOptions: {
+                level: 9
+            }
+        });
         saveAs(zipBlob, 'tiled_images.zip');
         
         toast({

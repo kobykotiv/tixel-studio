@@ -85,13 +85,14 @@ export function TilingControls({
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `tiled_${sourceImage.name.split('.')[0]}.png`;
+          const originalFileName = sourceImage.name.substring(0, sourceImage.name.lastIndexOf('.')) || sourceImage.name;
+          a.download = `tiled_${originalFileName}.png`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
         }
-      }, 'image/png');
+      }, 'image/png', 1.0);
     };
     img.onerror = () => {
         toast({ variant: 'destructive', title: "Error loading image for download."})
@@ -146,7 +147,7 @@ export function TilingControls({
             type="file"
             className="hidden"
             ref={fileInputRef}
-            onChange={handleFileChange}
+            onChange={handleFilechange}
             accept="image/png, image/jpeg"
           />
         </div>
