@@ -1,0 +1,115 @@
+"use client";
+
+import * as React from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { UploadCloud, CheckCircle2, AlertCircle, Loader2, Trash2, FileArchive } from 'lucide-react';
+import type { BatchFile } from '@/app/page';
+import Image from 'next/image';
+import { useToast } from '@/hooks/use-toast';
+
+type BatchQueueProps = {
+  files: BatchFile[];
+  onAddFiles: (files: File[]) => void;
+  onClearCompleted: () => void;
+  onClearAll: () => void;
+};
+
+export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll }: BatchQueueProps) {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      onAddFiles(Array.from(event.target.files));
+    }
+  };
+  
+  const allCompleted = files.length > 0 && files.every(f => f.status === 'completed' || f.status === 'error');
+
+  const handleDownloadAll = () => {
+    toast({
+        title: "Preparing Download",
+        description: "Your files are being zipped. This is a placeholder for the actual download functionality."
+    })
+  }
+
+  return (
+    <Card className="mt-6 border-0 shadow-none bg-transparent">
+      <CardHeader className="p-0 mb-4">
+        <CardTitle>Batch Processing</CardTitle>
+        <CardDescription>Upload multiple images to tile them all with the same settings.</CardDescription>
+      </CardHeader>
+      <CardContent className="p-0">
+        {files.length === 0 ? (
+          <div
+            className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer border-primary/50 hover:border-primary transition-colors bg-muted/20"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+              <UploadCloud className="w-10 h-10 mb-3 text-primary" />
+              <p className="mb-2 text-sm text-muted-foreground">
+                <span className="font-semibold">Upload multiple images</span>
+              </p>
+            </div>
+            <input
+              id="batch-upload"
+              type="file"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              multiple
+            />
+          </div>
+        ) : (
+          <ScrollArea className="h-64 pr-4 -mr-4">
+            <div className="space-y-4">
+              {files.map(item => (
+                <div key={item.id} className="flex items-center gap-4 p-2 rounded-lg bg-muted/30">
+                  <Image
+                    src={URL.createObjectURL(item.file)}
+                    alt={item.file.name}
+                    width={48}
+                    height={48}
+                    className="rounded-md object-cover w-12 h-12 shrink-0"
+                  />
+                  <div className="flex-1 space-y-1 overflow-hidden">
+                    <p className="text-sm font-medium truncate">{item.file.name}</p>
+                    <Progress value={item.progress} className="h-2" />
+                  </div>
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                    {item.status === 'completed' && <CheckCircle2 className="text-accent" />}
+                    {item.status === 'processing' && <Loader2 className="animate-spin text-primary" />}
+                    {item.status === 'queued' && <Loader2 className="text-muted-foreground" />}
+                    {item.status === 'error' && <AlertCircle className="text-destructive" />}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        )}
+      </CardContent>
+      {files.length > 0 && (
+        <CardFooter className="flex flex-col gap-2 p-0 pt-4">
+            <div className='flex gap-2 w-full'>
+                <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="flex-1">
+                    <UploadCloud className="mr-2 h-4 w-4"/> Add
+                </Button>
+                <Button variant="outline" onClick={onClearCompleted}>
+                    <Trash2 className="mr-2 h-4 w-4"/> Clear Done
+                </Button>
+                 <Button variant="destructive" size="icon" onClick={onClearAll}>
+                    <Trash2 className="h-4 w-4"/>
+                </Button>
+            </div>
+            <Button disabled={!allCompleted} onClick={handleDownloadAll} className="w-full">
+                <FileArchive className="mr-2 h-4 w-4"/> Download All (.zip)
+            </Button>
+        </CardFooter>
+      )}
+    </Card>
+  );
+}
