@@ -6,20 +6,53 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UploadCloud, CheckCircle2, AlertCircle, Loader2, Trash2, FileArchive } from 'lucide-react';
-import type { BatchFile } from '@/app/page';
+import type { BatchFile, TilingOptions } from '@/app/page';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+
 
 type BatchQueueProps = {
   files: BatchFile[];
   onAddFiles: (files: File[]) => void;
   onClearCompleted: () => void;
   onClearAll: () => void;
+  tilingOptions: TilingOptions;
 };
 
-export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll }: BatchQueueProps) {
+async function tileImage(file: File, tilingOptions: TilingOptions): Promise<Blob> {
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    await new Promise(resolve => img.onload = resolve);
+    
+    const canvas = document.createElement('canvas');
+    const maxDim = 4096;
+    const scale = Math.min(maxDim / (img.width * tilingOptions.cols), maxDim / (img.height * tilingOptions.rows), 1);
+    
+    canvas.width = Math.round(img.width * tilingOptions.cols * scale);
+    canvas.height = Math.round(img.height * tilingOptions.rows * scale);
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Could not get canvas context');
+
+    ctx.imageSmoothingEnabled = false;
+
+    for (let y = 0; y < tilingOptions.rows; y++) {
+      for (let x = 0; x < tilingOptions.cols; x++) {
+        ctx.drawImage(img, x * img.width * scale, y * img.height * scale, img.width * scale, img.height * scale);
+      }
+    }
+    
+    return new Promise(resolve => canvas.toBlob(blob => resolve(blob!), 'image/png'));
+}
+
+
+export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll, tilingOptions }: BatchQueueProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [isZipping, setIsZipping] = React.useState(false);
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -29,18 +62,57 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll }: 
   
   const allCompleted = files.length > 0 && files.every(f => f.status === 'completed' || f.status === 'error');
 
-  const handleDownloadAll = () => {
+  const handleDownloadAll = async () => {
+    const completedFiles = files.filter(f => f.status === 'completed');
+    if (completedFiles.length === 0) {
+        toast({
+            variant: "destructive",
+            title: "No completed files",
+            description: "There are no successfully tiled images to download."
+        });
+        return;
+    }
+
+    setIsZipping(true);
     toast({
-        title: "Preparing Download",
-        description: "Your files are being zipped. This is a placeholder for the actual download functionality."
-    })
+        title: "Zipping files...",
+        description: "Please wait while your tiled images are being prepared for download."
+    });
+
+    try {
+        const zip = new JSZip();
+        
+        for (const fileItem of completedFiles) {
+            const tiledBlob = await tileImage(fileItem.file, tilingOptions);
+            zip.file(`tiled_${fileItem.file.name.split('.')[0]}.png`, tiledBlob);
+        }
+
+        const zipBlob = await zip.generateAsync({type: 'blob'});
+        saveAs(zipBlob, 'tiled_images.zip');
+        
+        toast({
+            title: "Download ready!",
+            description: "Your zip file has been downloaded.",
+            className: "bg-accent text-accent-foreground border-accent",
+        });
+
+    } catch (error) {
+        console.error("Error zipping files:", error);
+        toast({
+            variant: "destructive",
+            title: "Zipping failed",
+            description: "Something went wrong while creating the zip file."
+        });
+    } finally {
+        setIsZipping(false);
+    }
   }
 
   return (
     <Card className="mt-6 border-0 shadow-none bg-transparent">
       <CardHeader className="p-0 mb-4">
-        <CardTitle>Batch Processing</CardTitle>
-        <CardDescription>Upload multiple images to tile them all with the same settings.</CardDescription>
+        <CardTitle>Batch Queue</CardTitle>
+        <CardDescription>Images added here will be tiled with the settings above.</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {files.length === 0 ? (
@@ -105,8 +177,9 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll }: 
                     <Trash2 className="h-4 w-4"/>
                 </Button>
             </div>
-            <Button disabled={!allCompleted} onClick={handleDownloadAll} className="w-full">
-                <FileArchive className="mr-2 h-4 w-4"/> Download All (.zip)
+            <Button disabled={!allCompleted || isZipping} onClick={handleDownloadAll} className="w-full">
+                {isZipping ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileArchive className="mr-2 h-4 w-4"/> }
+                {isZipping ? 'Zipping...' : 'Download All (.zip)'}
             </Button>
         </CardFooter>
       )}

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
-import { UploadCloud, Download, Wand2, Loader2 } from 'lucide-react';
+import { UploadCloud, Download, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { TilingOptions } from '@/app/page';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -20,6 +20,8 @@ type TilingControlsProps = {
   sourceImage: File | null;
   aiSuggestions: string[];
   isSuggesting: boolean;
+  isBatchMode?: boolean;
+  onDownload?: () => void;
 };
 
 export function TilingControls({
@@ -29,6 +31,8 @@ export function TilingControls({
   sourceImage,
   aiSuggestions,
   isSuggesting,
+  isBatchMode = false,
+  onDownload
 }: TilingControlsProps) {
   const [isCustom, setIsCustom] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -42,6 +46,10 @@ export function TilingControls({
   };
 
   const handleDownload = () => {
+    if(onDownload){
+      onDownload();
+      return;
+    }
     if (!sourceImage) {
       toast({
         variant: 'destructive',
@@ -103,44 +111,47 @@ export function TilingControls({
   const currentPreset = isCustom ? 'custom' : `${tilingOptions.cols}x${tilingOptions.rows}`;
 
   return (
-    <div className="space-y-6 pt-6">
-      <div className="space-y-2">
-        <Label htmlFor="image-upload" className="font-semibold">Source Image</Label>
-        <div
-          className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer border-primary/50 hover:border-primary transition-colors bg-muted/20 overflow-hidden"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {sourceImage ? (
-            <Image
-              src={URL.createObjectURL(sourceImage)}
-              alt="Source preview"
-              fill
-              className="object-contain rounded-lg p-2"
-            />
-          ) : (
-            <>
-              {uploadPlaceholder && 
-                <Image src={uploadPlaceholder.imageUrl} alt={uploadPlaceholder.description} data-ai-hint={uploadPlaceholder.imageHint} fill className="object-cover opacity-10" />
-              }
-              <div className="relative flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                <UploadCloud className="w-10 h-10 mb-3 text-primary" />
-                <p className="mb-2 text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground/90">Click to upload</span> or drag & drop
-                </p>
-                <p className="text-xs text-muted-foreground">PNG, JPG, up to 10MB</p>
-              </div>
-            </>
-          )}
+    <div className="space-y-6">
+      {!isBatchMode && (
+        <div className="space-y-2">
+          <Label htmlFor="image-upload" className="font-semibold">Source Image</Label>
+          <div
+            className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer border-primary/50 hover:border-primary transition-colors bg-muted/20 overflow-hidden"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {sourceImage ? (
+              <Image
+                src={URL.createObjectURL(sourceImage)}
+                alt="Source preview"
+                fill
+                className="object-contain rounded-lg p-2"
+              />
+            ) : (
+              <>
+                {uploadPlaceholder && 
+                  <Image src={uploadPlaceholder.imageUrl} alt={uploadPlaceholder.description} data-ai-hint={uploadPlaceholder.imageHint} fill className="object-cover opacity-10" />
+                }
+                <div className="relative flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                  <UploadCloud className="w-10 h-10 mb-3 text-primary" />
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground/90">Click to upload</span> or drag & drop
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, up to 10MB</p>
+                </div>
+              </>
+            )}
+          </div>
+          <Input
+            id="image-upload"
+            type="file"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/png, image/jpeg"
+          />
         </div>
-        <Input
-          id="image-upload"
-          type="file"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept="image/png, image/jpeg"
-        />
-      </div>
+      )}
+
 
       <div className="space-y-3">
         <Label className="font-semibold">Tiling Grid</Label>
@@ -203,10 +214,12 @@ export function TilingControls({
         </div>
       )}
 
-      <Button onClick={handleDownload} className="w-full !mt-8" size="lg" disabled={!sourceImage}>
-        <Download className="mr-2" />
-        Tile & Download
-      </Button>
+      {!isBatchMode && (
+        <Button onClick={handleDownload} className="w-full !mt-8" size="lg" disabled={!sourceImage}>
+          <Download className="mr-2" />
+          Tile & Download
+        </Button>
+      )}
     </div>
   );
 }

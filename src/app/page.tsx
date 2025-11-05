@@ -142,6 +142,7 @@ export default function Home() {
   }, [batchFiles, activeTab, processBatch]);
 
   const sourceImageUrl = sourceImage ? URL.createObjectURL(sourceImage) : null;
+  const previewImageUrl = activeTab === 'single' ? sourceImageUrl : (batchFiles[0] && URL.createObjectURL(batchFiles[0].file));
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -173,19 +174,32 @@ export default function Home() {
                         <p className="text-muted-foreground text-sm">Unlock batch processing and other powerful features to streamline your workflow.</p>
                     </div>
                 ) : (
-                    <BatchQueue
-                        files={batchFiles}
-                        onAddFiles={handleImageUpload}
-                        onClearCompleted={() => setBatchFiles(files => files.filter(f => f.status !== 'completed'))}
-                        onClearAll={() => setBatchFiles([])}
-                    />
+                  <div className="space-y-6 pt-6">
+                     <TilingControls
+                        onImageUpload={handleImageUpload}
+                        tilingOptions={tilingOptions}
+                        onTilingOptionsChange={setTilingOptions}
+                        sourceImage={null} // Not used in batch, but prop is required
+                        aiSuggestions={[]}
+                        isSuggesting={false}
+                        isBatchMode={true}
+                        onDownload={() => {}} // Not used in batch controls
+                      />
+                      <BatchQueue
+                          files={batchFiles}
+                          onAddFiles={handleImageUpload}
+                          onClearCompleted={() => setBatchFiles(files => files.filter(f => f.status !== 'completed'))}
+                          onClearAll={() => setBatchFiles([])}
+                          tilingOptions={tilingOptions}
+                      />
+                  </div>
                 )}
             </TabsContent>
           </Tabs>
         </aside>
         <section className="lg:col-span-2 xl:col-span-3 bg-black/20 p-4 flex items-center justify-center">
             <TiledPreview
-                imageUrl={sourceImageUrl}
+                imageUrl={previewImageUrl}
                 tilingOptions={tilingOptions}
             />
         </section>
