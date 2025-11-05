@@ -147,7 +147,7 @@ export function TilingControls({
             type="file"
             className="hidden"
             ref={fileInputRef}
-            onChange={handleFilechange}
+            onChange={handleFileChange}
             accept="image/png, image/jpeg"
           />
         </div>
