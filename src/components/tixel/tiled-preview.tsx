@@ -1,6 +1,6 @@
 "use client";
 
-import type { TilingOptions } from '@/app/page';
+import type { TilingOptions } from '@/app/App';
 
 type TiledPreviewProps = {
   imageUrl: string | null;

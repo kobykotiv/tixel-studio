@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { UploadCloud, Download, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { TilingOptions } from '@/app/page';
+import type { TilingOptions } from '@/app/App';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '@/components/ui/skeleton';
 

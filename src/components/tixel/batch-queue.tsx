@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UploadCloud, CheckCircle2, AlertCircle, Loader2, Trash2, FileArchive } from 'lucide-react';
-import type { BatchFile, TilingOptions } from '@/app/page';
+import type { BatchFile, TilingOptions } from '@/app/App';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import JSZip from 'jszip';
