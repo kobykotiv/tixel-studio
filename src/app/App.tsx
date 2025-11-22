@@ -142,7 +142,8 @@ function HomePage() {
             </TabsContent>
           </Tabs>
            <div className="mt-auto flex justify-center pt-6">
-             <AdPlaceholder width={300} height={250} />
+             {/* Replace YOUR_AD_SLOT_ID with the one from your AdSense account for this ad unit */}
+             <AdPlaceholder width={300} height={250} adSlot="YOUR_AD_SLOT_ID" />
            </div>
         </aside>
         <section className="lg:col-span-2 xl:col-span-3 bg-black/20 p-4 flex items-center justify-center">

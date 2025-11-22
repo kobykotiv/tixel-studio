@@ -191,7 +191,8 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll, ti
                 {isZipping ? 'Zipping...' : 'Download All (.zip)'}
             </Button>
             <div className="mt-4 flex justify-center w-full">
-               <AdPlaceholder width={728} height={90} className="w-full max-w-full" />
+                {/* Replace YOUR_AD_SLOT_ID with the one from your AdSense account for this ad unit */}
+               <AdPlaceholder width={728} height={90} className="w-full max-w-full" adSlot="YOUR_AD_SLOT_ID" />
             </div>
         </CardFooter>
       )}

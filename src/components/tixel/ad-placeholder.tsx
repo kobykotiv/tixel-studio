@@ -3,14 +3,26 @@
 
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import React from 'react';
 
 type AdPlaceholderProps = {
   width: number;
   height: number;
   className?: string;
+  // You will get this from your AdSense account for each ad unit
+  adSlot: string; 
 };
 
-export function AdPlaceholder({ width, height, className }: AdPlaceholderProps) {
+export function AdPlaceholder({ width, height, className, adSlot }: AdPlaceholderProps) {
+    React.useEffect(() => {
+        try {
+            // @ts-ignore
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {
+            console.error("AdSense error:", e);
+        }
+    }, []);
+
   return (
     <Card
       className={cn(
@@ -19,14 +31,17 @@ export function AdPlaceholder({ width, height, className }: AdPlaceholderProps) 
       )}
       style={{ width: `${width}px`, height: `${height}px`, maxWidth: '100%' }}
     >
-      {/*
-        Google AdSense code can be placed here.
-        Make sure to use the correct ad unit size that matches the props.
-      */}
-      <div className="text-center">
-        <p className="text-sm font-medium">Ad Placeholder</p>
-        <p className="text-xs text-muted-foreground/80">{`${width}x${height}`}</p>
-      </div>
+       {/* 
+          This is the ad unit. Replace 'ca-pub-YOUR_PUBLISHER_ID' with your actual publisher ID.
+          The 'data-ad-slot' is passed in via props. Make sure you create ad units in AdSense
+          with the correct sizes to match the width and height props.
+        */}
+      <ins
+        className="adsbygoogle"
+        style={{ display: 'inline-block', width: `${width}px`, height: `${height}px` }}
+        data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+        data-ad-slot={adSlot}
+      ></ins>
     </Card>
   );
 }
