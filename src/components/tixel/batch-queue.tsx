@@ -191,7 +191,7 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll, ti
                 {isZipping ? 'Zipping...' : 'Download All (.zip)'}
             </Button>
             <div className="mt-4 flex justify-center w-full">
-               <AdPlaceholder width={728} height={90} />
+               <AdPlaceholder width={728} height={90} className="w-full max-w-full" />
             </div>
         </CardFooter>
       )}
