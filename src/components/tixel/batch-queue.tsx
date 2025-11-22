@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { AdPlaceholder } from './ad-placeholder';
 
 
 type BatchQueueProps = {
@@ -189,10 +190,9 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll, ti
                 {isZipping ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileArchive className="mr-2 h-4 w-4"/> }
                 {isZipping ? 'Zipping...' : 'Download All (.zip)'}
             </Button>
-            <Card className="mt-4 p-2 w-full text-center bg-muted/20 border-dashed">
-                <p className="text-xs text-muted-foreground">Ad Placeholder</p>
-                <p className="text-[10px] text-muted-foreground/50">728x90</p>
-            </Card>
+            <div className="mt-4 flex justify-center w-full">
+               <AdPlaceholder width={728} height={90} />
+            </div>
         </CardFooter>
       )}
     </Card>

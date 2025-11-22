@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from "@/hooks/use-toast"
 import { Grid, Layers } from 'lucide-react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
+import { AdPlaceholder } from '@/components/tixel/ad-placeholder';
 
 export type TilingOptions = {
   rows: number;
@@ -141,10 +141,9 @@ function HomePage() {
               </div>
             </TabsContent>
           </Tabs>
-           <Card className="mt-auto p-4 text-center bg-muted/20 border-dashed">
-            <p className="text-sm text-muted-foreground">Ad Placeholder</p>
-            <p className="text-xs text-muted-foreground/50">300x250</p>
-          </Card>
+           <div className="mt-auto flex justify-center pt-6">
+             <AdPlaceholder width={300} height={250} />
+           </div>
         </aside>
         <section className="lg:col-span-2 xl:col-span-3 bg-black/20 p-4 flex items-center justify-center">
             <TiledPreview
