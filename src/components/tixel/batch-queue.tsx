@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { AdPlaceholder } from './ad-placeholder';
+import { formatBytes } from '@/lib/utils';
 
 
 type BatchQueueProps = {
@@ -83,8 +84,10 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll, ti
 
     try {
         const zip = new JSZip();
+        let totalOriginalSize = 0;
         
         for (const fileItem of completedFiles) {
+            totalOriginalSize += fileItem.file.size;
             const tiledBlob = await tileImage(fileItem.file, tilingOptions);
             const originalFileName = fileItem.file.name.substring(0, fileItem.file.name.lastIndexOf('.')) || fileItem.file.name;
             zip.file(`tiled_${originalFileName}.png`, tiledBlob);
@@ -99,9 +102,12 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll, ti
         });
         saveAs(zipBlob, 'tiled_images.zip');
         
+        const savings = totalOriginalSize - zipBlob.size;
+        const percentageSaved = totalOriginalSize > 0 ? (savings / totalOriginalSize * 100).toFixed(1) : 0;
+        
         toast({
             title: "Download ready!",
-            description: "Your zip file has been downloaded.",
+            description: `You saved ${formatBytes(savings)} (${percentageSaved}%)`,
             className: "bg-accent text-accent-foreground border-accent",
         });
 

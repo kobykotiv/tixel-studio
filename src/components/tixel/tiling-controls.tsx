@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -12,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { TilingOptions } from '@/app/App';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatBytes } from '@/lib/utils';
 
 type TilingControlsProps = {
   onImageUpload: (files: File[]) => void;
@@ -91,6 +93,15 @@ export function TilingControls({
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
+          
+          const savings = sourceImage.size - blob.size;
+          const percentageSaved = sourceImage.size > 0 ? (savings / sourceImage.size * 100).toFixed(1) : 0;
+
+          toast({
+            title: "Download Started!",
+            description: `You saved ${formatBytes(savings)} (${percentageSaved}%)`,
+            className: "bg-accent text-accent-foreground border-accent",
+          });
         }
       }, 'image/png', 1.0);
     };
