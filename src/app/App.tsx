@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from "@/hooks/use-toast"
 import { Grid, Layers } from 'lucide-react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
 
 export type TilingOptions = {
   rows: number;
@@ -24,7 +25,6 @@ export type BatchFile = {
 };
 
 function HomePage() {
-  const [isPremium, setIsPremium] = React.useState(false);
   const [sourceImage, setSourceImage] = React.useState<File | null>(null);
   const [tilingOptions, setTilingOptions] = React.useState<TilingOptions>({ rows: 4, cols: 4 });
   const [batchFiles, setBatchFiles] = React.useState<BatchFile[]>([]);
@@ -39,14 +39,6 @@ function HomePage() {
         setSourceImage(file);
       }
     } else {
-      if (!isPremium) {
-        toast({
-          variant: "destructive",
-          title: "Premium Feature",
-          description: "Batch processing is a premium feature. Please upgrade to use it.",
-        });
-        return;
-      }
       const newBatchFiles: BatchFile[] = files.map(file => ({
         id: `${file.name}-${Date.now()}`,
         file,
@@ -57,18 +49,7 @@ function HomePage() {
     }
   };
 
-  const handleUpgrade = () => {
-    setIsPremium(true);
-    toast({
-      title: "Congratulations!",
-      description: "You've unlocked all premium features.",
-      className: "bg-accent text-accent-foreground border-accent",
-    });
-  };
-
   const processBatch = React.useCallback(() => {
-    if (!isPremium) return;
-
     const filesToProcess = batchFiles.filter(f => f.status === 'queued');
     if (filesToProcess.length === 0) {
         if (batchFiles.length > 0 && batchFiles.every(f => f.status === 'completed' || f.status === 'error')) {
@@ -101,7 +82,7 @@ function HomePage() {
             return prev;
         });
     }, 300);
-  }, [batchFiles, isPremium, toast]);
+  }, [batchFiles, toast]);
   
   React.useEffect(() => {
     const isProcessing = batchFiles.some(f => f.status === 'processing');
@@ -117,7 +98,7 @@ function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Header isPremium={isPremium} onUpgrade={handleUpgrade} />
+      <Header />
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-0">
         <aside className="lg:col-span-1 xl:col-span-1 flex flex-col bg-card/50 lg:border-r lg:border-border/50 p-4 sm:p-6">
           <Tabs value={activeTab} onValueChange={(value) => {
@@ -126,7 +107,7 @@ function HomePage() {
           }} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="single"><Grid className="mr-2 h-4 w-4"/>Single Image</TabsTrigger>
-              <TabsTrigger value="batch"><Layers className="mr-2 h-4 w-4"/>Batch Tiling {!isPremium && <span className="ml-2 text-xs text-primary">(Premium)</span>}</TabsTrigger>
+              <TabsTrigger value="batch"><Layers className="mr-2 h-4 w-4"/>Batch Tiling</TabsTrigger>
             </TabsList>
             <TabsContent value="single" className="relative">
               <TilingControls
@@ -139,34 +120,31 @@ function HomePage() {
               />
             </TabsContent>
             <TabsContent value="batch">
-                {!isPremium ? (
-                     <div className="text-center p-8 mt-6 bg-muted/20 rounded-lg">
-                        <h3 className="font-semibold text-lg">Upgrade to Premium</h3>
-                        <p className="text-muted-foreground text-sm">Unlock batch processing and other powerful features to streamline your workflow.</p>
-                    </div>
-                ) : (
-                  <div className="space-y-6 pt-6">
-                     <TilingControls
-                        onImageUpload={handleImageUpload}
-                        tilingOptions={tilingOptions}
-                        onTilingOptionsChange={setTilingOptions}
-                        sourceImage={null} // Not used in batch, but prop is required
-                        aiSuggestions={[]}
-                        isSuggesting={false}
-                        isBatchMode={true}
-                        onDownload={() => {}} // Not used in batch controls
-                      />
-                      <BatchQueue
-                          files={batchFiles}
-                          onAddFiles={handleImageUpload}
-                          onClearCompleted={() => setBatchFiles(files => files.filter(f => f.status !== 'completed'))}
-                          onClearAll={() => setBatchFiles([])}
-                          tilingOptions={tilingOptions}
-                      />
-                  </div>
-                )}
+              <div className="space-y-6 pt-6">
+                 <TilingControls
+                    onImageUpload={handleImageUpload}
+                    tilingOptions={tilingOptions}
+                    onTilingOptionsChange={setTilingOptions}
+                    sourceImage={null} // Not used in batch, but prop is required
+                    aiSuggestions={[]}
+                    isSuggesting={false}
+                    isBatchMode={true}
+                    onDownload={() => {}} // Not used in batch controls
+                  />
+                  <BatchQueue
+                      files={batchFiles}
+                      onAddFiles={handleImageUpload}
+                      onClearCompleted={() => setBatchFiles(files => files.filter(f => f.status !== 'completed'))}
+                      onClearAll={() => setBatchFiles([])}
+                      tilingOptions={tilingOptions}
+                  />
+              </div>
             </TabsContent>
           </Tabs>
+           <Card className="mt-auto p-4 text-center bg-muted/20 border-dashed">
+            <p className="text-sm text-muted-foreground">Ad Placeholder</p>
+            <p className="text-xs text-muted-foreground/50">300x250</p>
+          </Card>
         </aside>
         <section className="lg:col-span-2 xl:col-span-3 bg-black/20 p-4 flex items-center justify-center">
             <TiledPreview

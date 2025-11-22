@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -188,6 +189,10 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll, ti
                 {isZipping ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileArchive className="mr-2 h-4 w-4"/> }
                 {isZipping ? 'Zipping...' : 'Download All (.zip)'}
             </Button>
+            <Card className="mt-4 p-2 w-full text-center bg-muted/20 border-dashed">
+                <p className="text-xs text-muted-foreground">Ad Placeholder</p>
+                <p className="text-[10px] text-muted-foreground/50">728x90</p>
+            </Card>
         </CardFooter>
       )}
     </Card>
