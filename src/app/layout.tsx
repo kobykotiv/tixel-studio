@@ -6,6 +6,7 @@ import Script from 'next/script';
 export const metadata: Metadata = {
   title: 'Tixel',
   description: 'A texture tiling utility for generating seamless patterns.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -16,8 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        <meta name="theme-color" content="#000000" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
