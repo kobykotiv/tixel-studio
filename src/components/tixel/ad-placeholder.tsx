@@ -17,7 +17,10 @@ export function AdPlaceholder({ width, height, className, adSlot }: AdPlaceholde
     React.useEffect(() => {
         try {
             // @ts-ignore
-            (adsbygoogle = window.adsbygoogle || []).push({});
+            if (window.adsbygoogle) {
+                // @ts-ignore
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            }
         } catch (e) {
             console.error("AdSense error:", e);
         }
