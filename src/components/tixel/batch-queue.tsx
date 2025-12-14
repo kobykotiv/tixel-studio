@@ -249,5 +249,3 @@ export function BatchQueue({ files, onAddFiles, onClearCompleted, onClearAll, ti
     </>
   );
 }
-
-    

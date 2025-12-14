@@ -45,5 +45,3 @@ export function AdDialog({ open, onOpenChange, onConfirm, isZipping }: AdDialogP
     </AlertDialog>
   );
 }
-
-    
