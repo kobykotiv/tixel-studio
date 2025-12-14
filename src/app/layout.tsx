@@ -26,6 +26,7 @@ export default function RootLayout({
         />
         {/*
           Replace ca-pub-YOUR_PUBLISHER_ID with your actual Google AdSense Publisher ID.
+          You can find this in your AdSense account.
         */}
         <Script
           async

@@ -35,9 +35,10 @@ export function AdPlaceholder({ width, height, className, adSlot }: AdPlaceholde
       style={{ width: `${width}px`, height: `${height}px`, maxWidth: '100%' }}
     >
        {/* 
-          This is the ad unit. Replace 'ca-pub-YOUR_PUBLISHER_ID' with your actual publisher ID.
-          The 'data-ad-slot' is passed in via props. Make sure you create ad units in AdSense
-          with the correct sizes to match the width and height props.
+          This is the ad unit. 
+          1. Replace 'ca-pub-YOUR_PUBLISHER_ID' with your actual publisher ID.
+          2. Make sure the 'data-ad-slot' (passed via props) matches an ad unit you created in AdSense.
+          3. Ensure the width and height match the ad unit's size in AdSense.
         */}
       <ins
         className="adsbygoogle"
