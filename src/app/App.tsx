@@ -24,6 +24,8 @@ export type BatchFile = {
   progress: number;
 };
 
+export const CHUNK_SIZE = 5;
+
 function HomePage() {
   const [sourceImage, setSourceImage] = React.useState<File | null>(null);
   const [tilingOptions, setTilingOptions] = React.useState<TilingOptions>({ rows: 4, cols: 4 });
@@ -52,36 +54,53 @@ function HomePage() {
   const processBatch = React.useCallback(() => {
     const filesToProcess = batchFiles.filter(f => f.status === 'queued');
     if (filesToProcess.length === 0) {
-        if (batchFiles.length > 0 && batchFiles.every(f => f.status === 'completed' || f.status === 'error')) {
-            toast({
-                title: "Batch Complete",
-                description: "All images have been processed.",
-                className: "bg-accent text-accent-foreground border-accent",
-            });
-        }
-        return;
+      if (batchFiles.length > 0 && batchFiles.every(f => f.status === 'completed' || f.status === 'error')) {
+        toast({
+          title: "Batch Complete",
+          description: "All images have been processed.",
+          className: "bg-accent text-accent-foreground border-accent",
+        });
+      }
+      return;
     };
 
-    const fileToProcess = filesToProcess[0];
+    const chunkToProcess = filesToProcess.slice(0, CHUNK_SIZE);
 
-    setBatchFiles(prev => prev.map(f => f.id === fileToProcess.id ? { ...f, status: 'processing' } : f));
+    setBatchFiles(prev =>
+      prev.map(f =>
+        chunkToProcess.some(ctp => ctp.id === f.id)
+          ? { ...f, status: 'processing' }
+          : f
+      )
+    );
+    
+    let processedInChunk = 0;
 
-    const interval = setInterval(() => {
-        setBatchFiles(prev => {
-            const currentFile = prev.find(f => f.id === fileToProcess.id);
-            if (currentFile && currentFile.status === 'processing') {
-                const newProgress = currentFile.progress + 20;
-                if (newProgress >= 100) {
-                    clearInterval(interval);
-                    return prev.map(f => f.id === fileToProcess.id ? { ...f, status: 'completed', progress: 100 } : f);
+    const processFile = (fileToProcess: BatchFile) => {
+        const interval = setInterval(() => {
+            setBatchFiles(prev => {
+                const currentFile = prev.find(f => f.id === fileToProcess.id);
+                if (currentFile && currentFile.status === 'processing') {
+                    const newProgress = currentFile.progress + 20;
+                    if (newProgress >= 100) {
+                        clearInterval(interval);
+                        processedInChunk++;
+                        if (processedInChunk === chunkToProcess.length) {
+                             // This chunk is done, processBatch will be called again by useEffect
+                        }
+                        return prev.map(f => f.id === fileToProcess.id ? { ...f, status: 'completed', progress: 100 } : f);
+                    }
+                    return prev.map(f => f.id === fileToProcess.id ? { ...f, progress: newProgress } : f);
                 }
-                return prev.map(f => f.id === fileToProcess.id ? { ...f, progress: newProgress } : f);
-            }
-            // If status changed elsewhere, stop this interval.
-            clearInterval(interval);
-            return prev;
-        });
-    }, 300);
+                // If status changed elsewhere, stop this interval.
+                clearInterval(interval);
+                return prev;
+            });
+        }, 300);
+    }
+    
+    chunkToProcess.forEach(processFile);
+
   }, [batchFiles, toast]);
   
   React.useEffect(() => {
@@ -167,3 +186,5 @@ export default function App() {
     </Router>
   )
 }
+
+    
