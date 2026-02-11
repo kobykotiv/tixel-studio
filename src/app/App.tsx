@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Grid, Layers } from 'lucide-react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AdPlaceholder } from '@/components/tixel/ad-placeholder';
+import { ApiDocsPage } from '@/components/tixel/api-docs-page';
 
 export type TilingOptions = {
   rows: number;
@@ -182,6 +183,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/api-docs" element={<ApiDocsPage />} />
       </Routes>
     </Router>
   )
